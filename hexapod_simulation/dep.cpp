@@ -196,33 +196,35 @@ void DEP::learnController(){
     updateC =   ( mu ) * (v^T);
     break;
   }
-  case DEPConf::DEPNEW: { // DEP with cross time mapping
+
+
+  case DEPConf::DEPNEW: { // DEP NEW rules (Averaging and mapping)
     Matrix chi;
     chi.set(number_sensors,1);
     Matrix Lambda;
     Lambda.set(number_sensors, number_sensors);
 
-    // CHANGES: making Lambda update inside average update below
+    // Making Lambda update here outside, since Lambda needs only averaged once, no need to update Lambda inside the averaged rule as below
     for(int i=(t-Time); i<t; i++){ 
       Lambda += ( ( x_derivitives_averages[i-timedist] ) * ((x_derivitives_averages[i-timedist])^T) ) * (1./((double)Time));  //average vector outer product
     }
+    // Perhaps here should constrains the Lambda a little bit? (clip around 1, around unit matrix perhaps)
+    Lambda = Lambda.mapP(1.5, clip);       // Lambda is in range (-1.5, 1.5) perhaps?
     
     //using averaged derivitives here in chi and v! Lambda update inside.
     for(int i=(t-Time); i<t; i++){            // 0--> T change to (t-T) --> t
       chi  = x_derivitives_averages[i];       // x_derivitives[i];          // t-i to i   //// or here it could also be i+1
       v = x_derivitives_averages[i-timedist]; // x_derivitives[i-timedist];
-      // MM =  M_buffer[i];
-      // Lambda = ( ( x_derivitives[i-timedist] ) * ((x_derivitives[i-timedist])^T) );
+      // Since the M is only a same unit matrix here, no need to use M_buffer to store M. Just M in following.
       updateC += ( ((M * chi) * (v^T) ) ) * (1./((double)Time));                 // time averaged on all product
     }
     
-    // for(int i=0; i<Time; i++){ 
-    //   Lambda += ( ( x_derivitives[t-timedist-i] ) * ((x_derivitives[t-timedist-i])^T) ) * (1./Time);  //average vector outer product
-    // }
+    // Here, we normalize the Lambda Inverse to avoid the infinite value. And clip it again. Or maybe we can clip updateC. 
     updateC = updateC * ((Lambda.pseudoInverse()).mapP(1.5, clip));
 
     break;
   } 
+
 
 
 
