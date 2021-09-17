@@ -142,7 +142,7 @@ void DEP::stepNoLearning(const sensor* x_, int number_sensors_robot,
   // 1. calculate x_derivitives and stored in a RingBuffer
   x_derivitives[t] = x_buffer[t] - x_buffer[t-2];
 
-  2. calculate x_derivitives MOVING averages and stored in another RingBuffer
+  // 2. calculate x_derivitives MOVING averages and stored in another RingBuffer
   if(t<=200){                     // hard update
     x_derivitives_averages[t] = x_derivitives[t];
   }else{
