@@ -44,7 +44,7 @@ DEP::DEP(const DEPConf& conf)
   addParameterDef("Time", &Time, 50,          0,500,  "Time ");
 
   //  addParameterDef("maxspeed", &maxSpeed, 0.5,   0,2, "maximal speed for motors");
-  addParameterDef("indnorm", &indnorm,     -1,   0,2, "individual normalization for each motor");
+  addParameterDef("indnorm", &indnorm,     2,   0,5, "individual normalization for each motor");
   addParameterDef("regularization", &regularization, 2, 0, 15, "exponent of regularization 10^{-regularization}");
 
   addInspectableMatrix("M", &M, false, "inverse-model matrix");
@@ -52,6 +52,8 @@ DEP::DEP(const DEPConf& conf)
   addInspectableMatrix("h",  &h, false,   "acting controller bias");
   addInspectableMatrix("C", &C, false, "acting controller matrix");
   addInspectableMatrix("B", &B, false, "Lambda inverse mapping matrix");
+  addInspectableMatrix("Lambda", &Lambda, false, "Sensor smoothing/Mapping matrix Lambda");
+  addInspectableMatrix("C_update", &C_update, false, "C = C_update * synboost; C update matrix");
 
   if(conf.calcEigenvalues){
     addInspectableMatrix("EvRe", &eigenvaluesLRe, false, "Eigenvalues of L (Re)");
@@ -91,6 +93,7 @@ void DEP::init(int sensornumber, int motornumber, RandGen* randGen){
 
   B.set(number_sensors, number_sensors);
   B.toId();
+  Lambda.set(number_sensors, number_sensors);
 
   L.set(number_sensors, number_sensors);
 
@@ -174,6 +177,9 @@ void DEP::stepNoLearning(const sensor* x_, int number_sensors_robot,
 
 void DEP::learnController(){
   ///////////////// START of Controller Learning / Update  ////////////////
+  // double positive_reg = pow(10,regularization);
+  double reg = pow(10,-regularization);
+
   int diff = 1;
   Matrix mu;
   Matrix v;
@@ -214,13 +220,11 @@ void DEP::learnController(){
   case DEPConf::DEPNEW: { // DEP NEW rules (Averaging and mapping)
     Matrix chi;
     chi.set(number_sensors,1);
-    Matrix Lambda;
-    Lambda.set(number_sensors, number_sensors);
-
+    
     // Making Lambda update here outside, since Lambda needs only averaged once, no need to update Lambda inside the averaged rule as below
     Lambda.toZero(); //just in case
     for(int i=(t-Time); i<t; i++){ 
-      Lambda += ( ( x_derivitives_averages[i-timedist] ) * ((x_derivitives_averages[i-timedist])^T) ) * (1./((double)Time));  //average vector outer product
+      Lambda += ( ( x_derivitives_averages[i-timedist] ) * ((x_derivitives_averages[i-timedist])^T) ); //* (1./((double)Time));  //average vector outer product
     }
     
     //using averaged derivitives here in chi and v! Lambda update inside.
@@ -255,7 +259,8 @@ void DEP::learnController(){
   //   C_update += ((updateC   - C_update)*urate);  // disabled, is done in DEPConf::DEPNEW:
   // }
 
-  double reg = pow(10,-regularization);
+  // double reg = pow(10,-regularization);
+  
   switch(indnorm){
   case 1: {
     //***** individual normalization for each motor neuron***************

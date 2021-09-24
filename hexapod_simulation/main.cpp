@@ -236,10 +236,11 @@ public:
         dep->setParam("epsM",0);
         dep->setParam("epsh",0.0);
         dep->setParam("synboost",2.2);
-        dep->setParam("urate",0.05);
-        dep->setParam("indnorm",1); // 0 is global normalization
-        dep->setParam("timedist",4);
-        dep->setParam("learningrule", 3);
+        dep->setParam("learningrule", 3);  // 3 is the DEPNEW rule
+
+        // dep->setParam("indnorm",1); // 0 is global normalization
+        // dep->setParam("urate",0.05);
+        // dep->setParam("timedist",4);        
 
         controller=dep;
       } else if(useSine) {
