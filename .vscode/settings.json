@@ -158,6 +158,8 @@
     "buffered_value": "cpp",
     "fast_back_stack": "cpp",
     "observer_ptr": "cpp",
-    "ref_ptr": "cpp"
+    "ref_ptr": "cpp",
+    "depcode": "c",
+    "block": "c"
   }
 }

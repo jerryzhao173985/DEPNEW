@@ -38,19 +38,20 @@ DEP::DEP(const DEPConf& conf)
                   false,              string("which learning rule to use: ") +
                   std::accumulate(conf.LearningRuleNames.begin(),conf.LearningRuleNames.end(),
                                   std::string(),[](std::string a, std::pair<DEPConf::LearningRule,std::string> lr){return a + itos((int)lr.first) + ": " + lr.second + ", ";}));
-  addParameterDef("timedist", &timedist, 1,     0,10, "time distance of product terms in learning rule");
+  addParameterDef("timedist", &timedist, 3,     0,10, "time distance of product terms in learning rule");
   addParameterDef("synboost", &synboost, 5,     0,1,  "booster for synapses during motor signal creation");
-  addParameterDef("urate", &urate, .1,          0,5,  "update rate ");
+  addParameterDef("urate", &urate, .0,          0,5,  "update rate ");
   addParameterDef("Time", &Time, 50,          0,500,  "Time ");
 
   //  addParameterDef("maxspeed", &maxSpeed, 0.5,   0,2, "maximal speed for motors");
-  addParameterDef("indnorm", &indnorm,     1,   0,2, "individual normalization for each motor");
-  addParameterDef("regularization", &regularization, 12, 0, 15, "exponent of regularization 10^{-regularization}");
+  addParameterDef("indnorm", &indnorm,     -1,   0,2, "individual normalization for each motor");
+  addParameterDef("regularization", &regularization, 2, 0, 15, "exponent of regularization 10^{-regularization}");
 
   addInspectableMatrix("M", &M, false, "inverse-model matrix");
 
   addInspectableMatrix("h",  &h, false,   "acting controller bias");
   addInspectableMatrix("C", &C, false, "acting controller matrix");
+  addInspectableMatrix("B", &B, false, "Lambda inverse mapping matrix");
 
   if(conf.calcEigenvalues){
     addInspectableMatrix("EvRe", &eigenvaluesLRe, false, "Eigenvalues of L (Re)");
@@ -87,6 +88,9 @@ void DEP::init(int sensornumber, int motornumber, RandGen* randGen){
   eigenvaluesLRe.set(number_sensors,1);
   eigenvaluesLIm.set(number_sensors,1);
   normmot.set(number_motors, 1);
+
+  B.set(number_sensors, number_sensors);
+  B.toId();
 
   L.set(number_sensors, number_sensors);
 
@@ -146,7 +150,7 @@ void DEP::stepNoLearning(const sensor* x_, int number_sensors_robot,
   if(t<=200){                     // hard update
     x_derivitives_averages[t] = x_derivitives[t];
   }else{
-    x_derivitives_averages[t] += (x_derivitives[t] - x_derivitives_averages[t]) * 0.1;
+    x_derivitives_averages[t] += (x_derivitives[t] - x_derivitives_averages[t]) * 0.02;
   }
   // x_derivitives_averages[t] = x_derivitives[t];
 
@@ -182,18 +186,27 @@ void DEP::learnController(){
     v = x_buffer[t - timedist] - x_buffer[t - timedist - diff];
     mu = (M * chi);
     updateC =   ( mu ) * (v^T);
+    if ( t > 10){
+      C_update += ((updateC   - C_update)*urate);  
+    }
     break;
   }
   case DEPConf::DHL:{  ////////////////////////////
     mu  = y_buffer[t -   diff] - y_buffer[t - 2*diff];
     v = x_buffer[t - timedist] - x_buffer[t - timedist - diff];
     updateC =   ( mu ) * (v^T);
+    if ( t > 10){
+      C_update += ((updateC   - C_update)*urate);  
+    }
     break;
   }
   case DEPConf::HL:{  ////////////////////////////
     mu = y_buffer[t -   diff];
     v  = x_buffer[t - diff];
     updateC =   ( mu ) * (v^T);
+    if ( t > 10){
+      C_update += ((updateC   - C_update)*urate);  
+    }
     break;
   }
 
@@ -205,23 +218,28 @@ void DEP::learnController(){
     Lambda.set(number_sensors, number_sensors);
 
     // Making Lambda update here outside, since Lambda needs only averaged once, no need to update Lambda inside the averaged rule as below
+    Lambda.toZero(); //just in case
     for(int i=(t-Time); i<t; i++){ 
       Lambda += ( ( x_derivitives_averages[i-timedist] ) * ((x_derivitives_averages[i-timedist])^T) ) * (1./((double)Time));  //average vector outer product
     }
-    // Perhaps here should constrains the Lambda a little bit? (clip around 1, around unit matrix perhaps)
-    Lambda = Lambda.mapP(1.5, clip);       // Lambda is in range (-1.5, 1.5) perhaps?
     
     //using averaged derivitives here in chi and v! Lambda update inside.
+    updateC.toZero(); //just in case: updateC must be clean before the summation process in lines 225 to 230 is starting
+    
     for(int i=(t-Time); i<t; i++){            // 0--> T change to (t-T) --> t
       chi  = x_derivitives_averages[i];       // x_derivitives[i];          // t-i to i   //// or here it could also be i+1
       v = x_derivitives_averages[i-timedist]; // x_derivitives[i-timedist];
-      // Since the M is only a same unit matrix here, no need to use M_buffer to store M. Just M in following.
+      
       updateC += ( ((M * chi) * (v^T) ) ) * (1./((double)Time));                 // time averaged on all product
     }
     
-    // Here, we normalize the Lambda Inverse to avoid the infinite value. And clip it again. Or maybe we can clip updateC. 
-    updateC = updateC * ((Lambda.pseudoInverse()).mapP(1.5, clip));
-
+    
+    if (t%10 == 0)
+      B = Lambda.pseudoInverse(); //is done only in every tenth step
+    
+    updateC = updateC * B;
+	
+	  C_update = updateC.mapP(5.0, clip);
     break;
   } 
 
@@ -231,12 +249,11 @@ void DEP::learnController(){
   default:
     cerr << "unkown learning rule!" << endl;
   }
-  // Matrix updateC =   ( mu ) * (v^T);
+  
 
-
-  if ( t > 10){
-    C_update += ((updateC   - C_update)*urate);  // matrix for controller before normalization
-  }
+  // if ( t > 10){
+  //   C_update += ((updateC   - C_update)*urate);  // disabled, is done in DEPConf::DEPNEW:
+  // }
 
   double reg = pow(10,-regularization);
   switch(indnorm){
@@ -345,3 +362,4 @@ bool DEP::restore(FILE* f){
   t=0; // set time to zero to ensure proper filling of buffers
   return true;
 }
+

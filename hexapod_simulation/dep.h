@@ -136,6 +136,8 @@ protected:
   matrix::Matrix b; // Model Bias
   matrix::Matrix L; // Jacobi Matrix
 
+  matrix::Matrix B; 
+
   RingBuffer<matrix::Matrix> x_buffer; // buffer needed for delay and derivatives
   RingBuffer<matrix::Matrix> y_buffer; // buffer needed for delay and derivatives
 
