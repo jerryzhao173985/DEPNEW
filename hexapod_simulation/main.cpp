@@ -658,6 +658,73 @@ public:
         break;
       }
 
+      case 'u':{
+        std::cout << BOLDBLACK<< "------Plot C_update------" <<RESET<< std::endl;
+        DEP* dep = dynamic_cast<DEP*>(global.agents[0]->getController());
+        Matrix M1 = dep->getC_update();
+        int all_items = (M1.getM()) * (M1.getN());
+        CImg<double> values1(1, all_items, 1, 1, 0);
+        for (int i1 = 0; i1 < all_items; ++i1)
+        {
+          int j = i1%(M1.getM());  
+          values1(0, i1) = M1.val(j, (i1-j)/M1.getM());
+        }
+        const float x0 = (double) 1. ;
+        const float x1 = (double) all_items;
+        const unsigned int plot_type = 1;
+        const unsigned int vertex_type = 1;
+        CImgDisplay disp1;
+        CImg<double> values2;
+        values1.display_graph(disp1, plot_type, vertex_type, "X Axis", x0, x1, "Y Axis");
+        disp1.snapshot(values2);
+        values2.save_bmp("C_update.bmp");
+        break;
+      }
+      case 'U':{
+        std::cout << BOLDBLACK<< "------Plot B = Lambda.pseudoInverse()------" <<RESET<< std::endl;
+        DEP* dep = dynamic_cast<DEP*>(global.agents[0]->getController());
+        Matrix M1 = dep->getB();
+        int all_items = (M1.getM()) * (M1.getN());
+        CImg<double> values1(1, all_items, 1, 1, 0);
+        for (int i1 = 0; i1 < all_items; ++i1)
+        {
+          int j = i1%(M1.getM());  
+          values1(0, i1) = M1.val(j, (i1-j)/M1.getM());
+        }
+        const float x0 = (double) 1. ;
+        const float x1 = (double) all_items;
+        const unsigned int plot_type = 1;
+        const unsigned int vertex_type = 1;
+        CImgDisplay disp1;
+        CImg<double> values2;
+        values1.display_graph(disp1, plot_type, vertex_type, "X Axis", x0, x1, "Y Axis");
+        disp1.snapshot(values2);
+        values2.save_bmp("matrix_B.bmp");
+        break;
+      }
+      case 'L':{
+        std::cout << BOLDBLACK<< "------Plot Lambda------" <<RESET<< std::endl;
+        DEP* dep = dynamic_cast<DEP*>(global.agents[0]->getController());
+        Matrix M1 = dep->getLambda();
+        int all_items = (M1.getM()) * (M1.getN());
+        CImg<double> values1(1, all_items, 1, 1, 0);
+        for (int i1 = 0; i1 < all_items; ++i1)
+        {
+          int j = i1%(M1.getM());  
+          values1(0, i1) = M1.val(j, (i1-j)/M1.getM());
+        }
+        const float x0 = (double) 1. ;
+        const float x1 = (double) all_items;
+        const unsigned int plot_type = 1;
+        const unsigned int vertex_type = 1;
+        CImgDisplay disp1;
+        CImg<double> values2;
+        values1.display_graph(disp1, plot_type, vertex_type, "X Axis", x0, x1, "Y Axis");
+        disp1.snapshot(values2);
+        values2.save_bmp("matrix_Lambda.bmp");
+        break;
+      }
+
 
 
       }

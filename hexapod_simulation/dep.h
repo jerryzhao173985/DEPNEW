@@ -116,11 +116,29 @@ public:
     M=_M;
   }
   // accessors to matrices
-  virtual matrix::Matrix getC(){  return C_update; }
+  virtual matrix::Matrix getC(){  return C; }
   virtual void setC(const matrix::Matrix& _C){
-    assert(C_update.getM() == _C.getM() && C_update.getN() == _C.getN());
-    C_update=_C;
+    assert(C.getM() == _C.getM() && C.getN() == _C.getN());
+    C=_C;
   }
+  virtual matrix::Matrix getC_update(){  return C_update; }
+  virtual void setC_update(const matrix::Matrix& _C_update){
+    assert(C_update.getM() == _C_update.getM() && C_update.getN() == _C_update.getN());
+    C_update=_C_update;
+  }
+
+  virtual matrix::Matrix getLambda(){  return Lambda; }
+  virtual void setLambda(const matrix::Matrix& _Lambda){
+    assert(Lambda.getM() == _Lambda.getM() && Lambda.getN() == _Lambda.getN());
+    Lambda=_Lambda;
+  }
+  virtual matrix::Matrix getB(){  return B; }  //B = Lambda.pseudoInverse();
+  virtual void setB(const matrix::Matrix& _B){
+    assert(B.getM() == _B.getM() && B.getN() == _B.getN());
+    B=_B;
+  }
+
+
 
 protected:
   unsigned short number_sensors;
