@@ -21,6 +21,9 @@
  *
  ***************************************************************************/
 
+#include <iostream>
+#include <fstream>
+
 
 #include <ode_robots/simulation.h>
 
@@ -68,6 +71,11 @@ bool boxpile=false;
 int babbling=0;
 double initHeight=1.2;
 bool randomctrl=false;
+
+const char* config_name = "config.txt";
+
+double realtimefactor; //changeable speed for simulation graphics for recording images
+
 
 /// Class to wrap a sensor and feed its delayed values.
 class DelaySensor : public Sensor, public Configurable {
@@ -127,6 +135,56 @@ public:
     //setCaption ("Simulator by Martius et al");
 
   }
+
+
+  // notice here pcc should pass (to function) by reference, or the DiamondConf wouldn't update
+  void loadParams(DEP* dep, const char* filename = "config.txt"){
+    //read from config file first || there must be "=" in the config file!!
+    // std::ifstream is RAII, i.e. no need to call close
+    std::ifstream cFile (filename);  //"config.txt"
+    if (cFile.is_open())
+    {
+      std::string line;
+      while(std::getline(cFile, line)){
+        line.erase(std::remove_if(line.begin(), line.end(), ::isspace),line.end());
+        if( line.empty() || line[0] == '#' )
+        {
+            continue;
+        }
+        auto delimiterPos = line.find("=");
+        auto name = line.substr(0, delimiterPos);
+        auto value = line.substr(delimiterPos + 1);
+        
+        if(name=="epsM"){ 
+          dep->setParam("epsM", (double) std::stod(value));
+        }else if(name=="epsh"){
+          dep->setParam("epsh", (double) std::stod(value));
+        }else if(name=="synboost"){
+          dep->setParam("synboost", (double) std::stod(value)); 
+        }else if(name=="urate"){
+          dep->setParam("urate", (double) std::stod(value));
+        }else if(name== "indnorm"){
+          dep->setParam("indnorm", (int) std::stoi(value));
+        }else if(name=="timedist"){
+          dep->setParam("timedist", (int) std::stoi(value));
+        }else if(name=="learningrule"){
+          dep->setParam("learningrule", (int) std::stoi(value));
+        }else if(name=="Time"){
+          dep->setParam("Time", (int) std::stoi(value));
+        }else{
+          std::cout<< "some thing in the file cannot be assigned to the simulation controller." <<std::endl;
+        }
+        std::cout << name << " " << value << '\n';
+      }
+    }
+    else 
+    {
+      std::cerr << "Couldn't open config file for reading.\n";
+    }
+
+  }
+
+
 
   // starting function (executed once at the beginning of the simulation loop)
   void start(const OdeHandle& odeHandle, const OsgHandle& osgHandle, GlobalData& global)
@@ -240,7 +298,9 @@ public:
 
         // dep->setParam("indnorm",1); // 0 is global normalization
         // dep->setParam("urate",0.05);
-        // dep->setParam("timedist",4);        
+        // dep->setParam("timedist",4);
+
+        loadParams(dep, config_name);        
 
         controller=dep;
       } else if(useSine) {
@@ -565,6 +625,14 @@ int main (int argc, char **argv)
     noisecontrol=atof(argv[index]);
     useSine=true; useDEP = false;
   }
+
+  config_name = "config.txt";
+  index = Simulation::contains(argv, argc, "-config");
+  if(index)
+    if(argc > index)
+      config_name = argv[index];
+  std::cout<< std::endl << config_name << " successfully parsed from the CML!"<< std::endl;
+
   // DEP is default controller
   if(useSine)
     useDEP = false;

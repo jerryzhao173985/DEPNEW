@@ -1,0 +1,10 @@
+# set all network structure parameters from this config file
+# Parameters for DEPNEW:
+epsM = 0.0
+epsh = 0.0
+synboost = 2.1
+urate = 0.0
+indnorm = 2
+timedist = 4
+learningrule = 3
+Time = 50
