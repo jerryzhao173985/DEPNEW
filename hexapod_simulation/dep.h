@@ -166,6 +166,7 @@ protected:
 
   matrix::Matrix x_smooth; // time average of x values
   matrix::Matrix normmot; // factors for individual normalization
+  matrix::Matrix normmot_new; // NEW for SENSOR NORM factors for individual normalization
 
   matrix::Matrix eigenvaluesLRe; //Eigenvalues of L matrix real part
   matrix::Matrix eigenvaluesLIm; //Eigenvalues of L matrix imaginary part

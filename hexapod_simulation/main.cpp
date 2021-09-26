@@ -190,6 +190,8 @@ public:
           dep->setParam("urate", (double) std::stod(value));
         }else if(name== "indnorm"){
           dep->setParam("indnorm", (int) std::stoi(value));
+        }else if(name== "regularization"){
+          dep->setParam("regularization", (int) std::stoi(value));
         }else if(name=="timedist"){
           dep->setParam("timedist", (int) std::stoi(value));
         }else if(name=="learningrule"){

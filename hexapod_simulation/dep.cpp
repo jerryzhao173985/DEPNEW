@@ -66,6 +66,7 @@ DEP::DEP(const DEPConf& conf)
 
   addInspectableValue("norming", &norming, "Normalization");
   addInspectableMatrix("normmor", &normmot, false, "individual motor normalization factor");
+  addInspectableMatrix("normmor_new", &normmot_new, false, "NEW for SENSOR NORM individual motor normalization factor");
 
   _internWithLearning=false; // used in step to enable learning in stepNoLearning and have only one function
 };
@@ -90,6 +91,7 @@ void DEP::init(int sensornumber, int motornumber, RandGen* randGen){
   eigenvaluesLRe.set(number_sensors,1);
   eigenvaluesLIm.set(number_sensors,1);
   normmot.set(number_motors, 1);
+  normmot_new.set(number_sensors, 1);
 
   B.set(number_sensors, number_sensors);
   B.toId();
@@ -226,6 +228,21 @@ void DEP::learnController(){
     for(int i=(t-Time); i<t; i++){ 
       Lambda += ( ( x_derivitives_averages[i-timedist] ) * ((x_derivitives_averages[i-timedist])^T) ); //* (1./((double)Time));  //average vector outer product
     }
+    
+    // normalize Lambda: -----METHOD 1------
+    // double reg_new = pow(10,-regularization);
+    // double norm_new = sqrt(Lambda.norm_sqr());
+    // Lambda = Lambda * (1.0 /(norm_new + reg_new)); 
+    // normalize Lambda: -----METHOD 2------
+    const Matrix& CM = Lambda;
+    for (int i=0; i<number_sensors; i++) {
+      double normi = sqrt(CM.row(i).norm_sqr()); // norm of one row // for some historic reasons there is a 0.3 here
+      normmot_new.val(i,0) = .3*1.0/( normi + reg);
+    }
+    Lambda = Lambda.multrowwise(normmot_new);
+
+    // Lambda = Lambda * 100.0;
+    // Lambda = Lambda.mapP(2.0, clip);
     
     //using averaged derivitives here in chi and v! Lambda update inside.
     updateC.toZero(); //just in case: updateC must be clean before the summation process in lines 225 to 230 is starting
