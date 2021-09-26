@@ -222,6 +222,12 @@ main.o: /home/jerry/diamond/ode_robots/include/ode_robots/color.h
 main.o: /home/jerry/diamond/ode_robots/include/ode_robots/physicalsensor.h
 main.o: dep.h /home/jerry/diamond/selforg/include/selforg/controller_misc.h
 main.o: /home/jerry/diamond/selforg/include/selforg/ringbuffer.h
+main.o: ../utils/CImg.h /usr/include/unistd.h /usr/include/dirent.h
+main.o: /usr/include/fnmatch.h /usr/include/X11/Xlib.h /usr/include/X11/X.h
+main.o: /usr/include/X11/Xfuncproto.h /usr/include/X11/Xosdefs.h
+main.o: /usr/include/X11/Xutil.h /usr/include/X11/keysym.h
+main.o: /usr/include/X11/keysymdef.h /usr/include/pthread.h
+main.o: /usr/include/endian.h /usr/include/sched.h
 dep.o: dep.h /home/jerry/diamond/selforg/include/selforg/abstractcontroller.h
 dep.o: /usr/include/stdio.h
 dep.o: /home/jerry/diamond/selforg/include/selforg/configurable.h

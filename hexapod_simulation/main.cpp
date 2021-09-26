@@ -20,6 +20,25 @@
  *                                                                         *
  *
  ***************************************************************************/
+// For colored output with std::cout at the command line
+#define RESET   "\033[0m"
+#define BLACK   "\033[30m"      /* Black */
+#define RED     "\033[31m"      /* Red */
+#define GREEN   "\033[32m"      /* Green */
+#define YELLOW  "\033[33m"      /* Yellow */
+#define BLUE    "\033[34m"      /* Blue */
+#define MAGENTA "\033[35m"      /* Magenta */
+#define CYAN    "\033[36m"      /* Cyan */
+#define WHITE   "\033[37m"      /* White */
+#define BOLDBLACK   "\033[1m\033[30m"      /* Bold Black */
+#define BOLDRED     "\033[1m\033[31m"      /* Bold Red */
+#define BOLDGREEN   "\033[1m\033[32m"      /* Bold Green */
+#define BOLDYELLOW  "\033[1m\033[33m"      /* Bold Yellow */
+#define BOLDBLUE    "\033[1m\033[34m"      /* Bold Blue */
+#define BOLDMAGENTA "\033[1m\033[35m"      /* Bold Magenta */
+#define BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
+#define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
+//color code example: std::cout << RED << "hello world" << RESET << std::endl;
 
 #include <iostream>
 #include <fstream>
@@ -48,6 +67,12 @@
 #include "dep.h"
 
 
+//-------------additional library----------------------------
+//image processing library for screenshot images Cimg Library.
+#include "../utils/CImg.h"
+
+
+using namespace cimg_library;
 // fetch all the stuff of lpzrobots into scope
 using namespace lpzrobots;
 using namespace matrix;
@@ -300,7 +325,10 @@ public:
         // dep->setParam("urate",0.05);
         // dep->setParam("timedist",4);
 
-        loadParams(dep, config_name);        
+        if(dep->getParam("learningrule")==3){
+          std::cout<< GREEN << "loading parameters..."<< RESET<< std::endl;
+          loadParams(dep, config_name);
+        }        
 
         controller=dep;
       } else if(useSine) {
@@ -549,10 +577,87 @@ public:
         break;
       }
 
-      case 's' :{  //change the synchronized boost
-        global.odeConfig.setParam("realtimefactor", 1);
+      case 's':{
+        global.odeConfig.setParam("realtimefactor", 0);    //default/normal spped is 1.0
+        std::cout << "Simulation speed is: " << global.odeConfig.getParam("realtimefactor") <<std::endl;
         break;
       }
+      case 'S':{
+        global.odeConfig.setParam("realtimefactor", 1.0);    //default/normal spped is 1.0
+        std::cout << "Simulation speed is: " << global.odeConfig.getParam("realtimefactor") <<std::endl;
+        break;
+      }
+
+      case 'v':{
+        int con_interval = global.odeConfig.getParam("controlinterval");
+        global.odeConfig.setParam("controlinterval", con_interval+1);
+        std::cout << "ControlInterval is: " << con_interval+1 << std::endl;
+        break;
+      }
+      case 'V':{
+        int con_interval = global.odeConfig.getParam("controlinterval");
+        global.odeConfig.setParam("controlinterval", con_interval-1);
+        std::cout << "ControlInterval is: " << con_interval-1 << std::endl;
+        break;
+      }
+
+
+      case 'i':{
+        std::cout << BOLDBLACK<< "------Plot M1------" <<RESET<< std::endl;
+        DEP* dep = dynamic_cast<DEP*>(global.agents[0]->getController());
+        Matrix M1 = dep->getM();
+        int all_items = (M1.getM()) * (M1.getN());
+        std::cout <<all_items<<" , "<<  M1.getM() <<" , "<<  M1.getN() << std::endl;
+
+        CImg<double> values1(1, all_items, 1, 1, 0);
+
+        for (int i1 = 0; i1 < all_items; ++i1)
+        {
+          int j = i1%(M1.getM()); 
+          // std::cout<<j <<" , " <<  (i1-j)/M1.getM()  <<std::endl; 
+          values1(0, i1) = M1.val(j, (i1-j)/M1.getM());
+        }
+
+        const float x0 = (double) 1. ;
+        const float x1 = (double) all_items;
+        const unsigned int plot_type = 1;
+        const unsigned int vertex_type = 1;
+
+        CImgDisplay disp1;
+        CImg<double> values2;
+        values1.display_graph(disp1, plot_type, vertex_type, "X Axis", x0, x1, "Y Axis");
+        disp1.snapshot(values2);
+        values2.save_bmp("Matrix_M.bmp");
+        break;
+      }
+
+
+      case 'I':{
+        std::cout << BOLDBLACK<< "------Plot C1------" <<RESET<< std::endl;
+        DEP* dep = dynamic_cast<DEP*>(global.agents[0]->getController());
+        Matrix M1 = dep->getC();
+        int all_items = (M1.getM()) * (M1.getN());
+        CImg<double> values1(1, all_items, 1, 1, 0);
+
+        for (int i1 = 0; i1 < all_items; ++i1)
+        {
+          int j = i1%(M1.getM());  
+          values1(0, i1) = M1.val(j, (i1-j)/M1.getM());
+        }
+
+        const float x0 = (double) 1. ;
+        const float x1 = (double) all_items;
+        const unsigned int plot_type = 1;
+        const unsigned int vertex_type = 1;
+
+        CImgDisplay disp1;
+        CImg<double> values2;
+        values1.display_graph(disp1, plot_type, vertex_type, "X Axis", x0, x1, "Y Axis");
+        disp1.snapshot(values2);
+        values2.save_bmp("matrix_C.bmp");
+        break;
+      }
+
 
 
       }
