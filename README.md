@@ -33,3 +33,34 @@ DIAMOND rule: https://www.frontiersin.org/articles/10.3389/fnbot.2020.00062/full
 Lpzrobot software: https://github.com/georgmartius/lpzrobots  (Georg Martius et al)
 
 Installation Scripts: https://github.com/larsgroeber/lpzrobots-install-script
+
+
+
+## Matrix plot
+
+M, Lambda, B, C_update, C
+
+* **M**
+  
+  ![M](plot/matrix/Matrix_M.bmp)
+
+* **Lambda**
+
+    Seems to be very very large.
+
+  ![Lambda](plot/matrix/matrix_Lambda.bmp)
+
+
+* **B**
+  
+    B and C looks okay.
+
+  ![B](plot/matrix/matrix_B.bmp)
+
+* **C_update**
+  
+  ![C_update](plot/matrix/C_update.bmp)
+
+* **C**
+  
+  ![C](plot/matrix/matrix_C.bmp)
