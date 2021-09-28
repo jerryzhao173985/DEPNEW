@@ -198,6 +198,8 @@ public:
           dep->setParam("learningrule", (int) std::stoi(value));
         }else if(name=="Time"){
           dep->setParam("Time", (int) std::stoi(value));
+        }else if(name=="Lambda_update_interval"){
+          dep->setParam("Lambda_update_interval", (int) std::stoi(value));
         }else{
           std::cout<< "some thing in the file cannot be assigned to the simulation controller." <<std::endl;
         }
@@ -724,6 +726,28 @@ public:
         values1.display_graph(disp1, plot_type, vertex_type, "X Axis", x0, x1, "Y Axis");
         disp1.snapshot(values2);
         values2.save_bmp("matrix_Lambda.bmp");
+        break;
+      }
+      case 'l':{
+        std::cout << BOLDBLACK<< "------Plot uC(updateC) unit-like matrix------" <<RESET<< std::endl;
+        DEP* dep = dynamic_cast<DEP*>(global.agents[0]->getController());
+        Matrix M1 = dep->getuC();
+        int all_items = (M1.getM()) * (M1.getN());
+        CImg<double> values1(1, all_items, 1, 1, 0);
+        for (int i1 = 0; i1 < all_items; ++i1)
+        {
+          int j = i1%(M1.getM());  
+          values1(0, i1) = M1.val(j, (i1-j)/M1.getM());
+        }
+        const float x0 = (double) 1. ;
+        const float x1 = (double) all_items;
+        const unsigned int plot_type = 1;
+        const unsigned int vertex_type = 1;
+        CImgDisplay disp1;
+        CImg<double> values2;
+        values1.display_graph(disp1, plot_type, vertex_type, "X Axis", x0, x1, "Y Axis");
+        disp1.snapshot(values2);
+        values2.save_bmp("matrix_uC.bmp");
         break;
       }
 

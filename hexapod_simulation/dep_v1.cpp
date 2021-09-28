@@ -42,6 +42,7 @@ DEP::DEP(const DEPConf& conf)
   addParameterDef("synboost", &synboost, 5,     0,1,  "booster for synapses during motor signal creation");
   addParameterDef("urate", &urate, .1,          0,5,  "update rate ");
   addParameterDef("Time", &Time, 50,          0,500,  "Time ");
+  // addParameterDef("Lambda_update_interval", &Lambda_update_interval, 10,          0,500,  "Lambda update interval ");
 
   //  addParameterDef("maxspeed", &maxSpeed, 0.5,   0,2, "maximal speed for motors");
   addParameterDef("indnorm", &indnorm,     1,   0,2, "individual normalization for each motor");

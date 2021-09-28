@@ -2,10 +2,12 @@
 # Parameters for DEPNEW:
 epsM = 0.0
 epsh = 0.0
-synboost = 2.2
+synboost = 1.0
 urate = 0.0
 indnorm = 2
 regularization = 3
-timedist = 3
+timedist = 0
 learningrule = 3
 Time = 50
+
+# Lambda_update_interval = 10

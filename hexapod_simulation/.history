@@ -8,3 +8,10 @@ learningrule=4
 learningrule=10
 ?
 learningrule=0
+set Lambda_update_interval = 1
+set Lambda_update_interval=2
+set Lambda_update_interval=1
+set Lambda_update_interval=3
+set Lambda_update_interval=4
+set Lambda_update_interval=5
+set Lambda_update_interval=10

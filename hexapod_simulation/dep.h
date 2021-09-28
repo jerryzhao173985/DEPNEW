@@ -138,6 +138,12 @@ public:
     B=_B;
   }
 
+  virtual matrix::Matrix getuC(){  return uC; }  //B = Lambda.pseudoInverse();
+  virtual void setuC(const matrix::Matrix& _uC){
+    assert(uC.getM() == _uC.getM() && uC.getN() == _uC.getN());
+    uC=_uC;
+  }
+
 
 
 protected:
@@ -156,6 +162,7 @@ protected:
 
   matrix::Matrix B;
   matrix::Matrix Lambda; 
+  matrix::Matrix uC;
 
   RingBuffer<matrix::Matrix> x_buffer; // buffer needed for delay and derivatives
   RingBuffer<matrix::Matrix> y_buffer; // buffer needed for delay and derivatives
@@ -166,7 +173,6 @@ protected:
 
   matrix::Matrix x_smooth; // time average of x values
   matrix::Matrix normmot; // factors for individual normalization
-  matrix::Matrix normmot_new; // NEW for SENSOR NORM factors for individual normalization
 
   matrix::Matrix eigenvaluesLRe; //Eigenvalues of L matrix real part
   matrix::Matrix eigenvaluesLIm; //Eigenvalues of L matrix imaginary part
@@ -177,6 +183,7 @@ protected:
 
   int t;
   int Time;
+  int Lambda_update_interval;
 
   paramval epsh;
   paramval epsM;

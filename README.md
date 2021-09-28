@@ -36,7 +36,7 @@ Installation Scripts: https://github.com/larsgroeber/lpzrobots-install-script
 
 
 
-## Matrix plot
+<!-- ## Matrix plot
 
 M, Lambda, B, C_update, C
 
@@ -63,4 +63,29 @@ M, Lambda, B, C_update, C
 
 * **C**
   
-  ![C](plot/matrix/matrix_C.bmp)
+  ![C](plot/matrix/matrix_C.bmp) -->
+
+
+
+## uC Matrix Evaluations
+
+
+**uC when Lambda_update_interval = 1**     |  **Lambda_update_interval = 2**
+:-----------------------------------:|:-------------------------------------------:
+![M2](plot/uC/uC-1.gif)                  |  ![C2](plot/uC/uC-2.gif)
+
+
+
+**Lambda_update_interval = 3**      |  **Lambda_update_interval = 4**
+:-----------------------------------:|:-------------------------------------------:
+![M1](plot/uC/uC-3.gif)                  |  ![C1](plot/uC/uC-4.gif)
+
+
+**Lambda_update_interval = 5**      |  **Lambda_update_interval = 10**
+:-----------------------------------:|:-------------------------------------------:
+![M1](plot/uC/uC-5.gif)                  |  ![C1](plot/uC/uC-10.gif)
+
+
+We see that when Lambda_update_interval=1 and **synboost=1.0**, the **uC (updateC)** matrix is an unit matrix, then as the Lambda_update_interval goes up, the uC matrix goes far away from an unit matrix, but still from 2-4, we can also see sometimes it perserves an unit matrix.
+
+<br/><br/>

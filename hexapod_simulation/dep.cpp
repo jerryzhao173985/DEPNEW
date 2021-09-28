@@ -42,6 +42,7 @@ DEP::DEP(const DEPConf& conf)
   addParameterDef("synboost", &synboost, 5,     0,1,  "booster for synapses during motor signal creation");
   addParameterDef("urate", &urate, .0,          0,5,  "update rate ");
   addParameterDef("Time", &Time, 50,          0,500,  "Time ");
+  addParameterDef("Lambda_update_interval", &Lambda_update_interval, 10,          0,500,  "Lambda update interval ");
 
   //  addParameterDef("maxspeed", &maxSpeed, 0.5,   0,2, "maximal speed for motors");
   addParameterDef("indnorm", &indnorm,     2,   0,5, "individual normalization for each motor");
@@ -66,7 +67,7 @@ DEP::DEP(const DEPConf& conf)
 
   addInspectableValue("norming", &norming, "Normalization");
   addInspectableMatrix("normmor", &normmot, false, "individual motor normalization factor");
-  addInspectableMatrix("normmor_new", &normmot_new, false, "NEW for SENSOR NORM individual motor normalization factor");
+  addInspectableMatrix("uC", &uC, false, "updateC which is an approximate unit matrix");
 
   _internWithLearning=false; // used in step to enable learning in stepNoLearning and have only one function
 };
@@ -91,11 +92,13 @@ void DEP::init(int sensornumber, int motornumber, RandGen* randGen){
   eigenvaluesLRe.set(number_sensors,1);
   eigenvaluesLIm.set(number_sensors,1);
   normmot.set(number_motors, 1);
-  normmot_new.set(number_sensors, 1);
+  
 
   B.set(number_sensors, number_sensors);
   B.toId();
   Lambda.set(number_sensors, number_sensors);
+  uC.set(number_motors, number_sensors);
+  uC.toId();
 
   L.set(number_sensors, number_sensors);
 
@@ -179,8 +182,6 @@ void DEP::stepNoLearning(const sensor* x_, int number_sensors_robot,
 
 void DEP::learnController(){
   ///////////////// START of Controller Learning / Update  ////////////////
-  // double positive_reg = pow(10,regularization);
-  double reg = pow(10,-regularization);
 
   int diff = 1;
   Matrix mu;
@@ -220,45 +221,19 @@ void DEP::learnController(){
 
 
   case DEPConf::DEPNEW: { // DEP NEW rules (Averaging and mapping)
-    Matrix chi;
-    chi.set(number_sensors,1);
-    
-    // Making Lambda update here outside, since Lambda needs only averaged once, no need to update Lambda inside the averaged rule as below
-    Lambda.toZero(); //just in case
-    for(int i=(t-Time); i<t; i++){ 
-      Lambda += ( ( x_derivitives_averages[i-timedist] ) * ((x_derivitives_averages[i-timedist])^T) ); //* (1./((double)Time));  //average vector outer product
-    }
-    
-    // normalize Lambda: -----METHOD 1------
-    // double reg_new = pow(10,-regularization);
-    // double norm_new = sqrt(Lambda.norm_sqr());
-    // Lambda = Lambda * (1.0 /(norm_new + reg_new)); 
-    // normalize Lambda: -----METHOD 2------
-    const Matrix& CM = Lambda;
-    for (int i=0; i<number_sensors; i++) {
-      double normi = sqrt(CM.row(i).norm_sqr()); // norm of one row // for some historic reasons there is a 0.3 here
-      normmot_new.val(i,0) = .3*1.0/( normi + reg);
-    }
-    Lambda = Lambda.multrowwise(normmot_new);
-
-    // Lambda = Lambda * 100.0;
-    // Lambda = Lambda.mapP(2.0, clip);
-    
-    //using averaged derivitives here in chi and v! Lambda update inside.
-    updateC.toZero(); //just in case: updateC must be clean before the summation process in lines 225 to 230 is starting
+    Lambda.toZero();  //just in case
+    updateC.toZero(); //just in case: updateC must be clean before the summation process starting
     
     for(int i=(t-Time); i<t; i++){            // 0--> T change to (t-T) --> t
-      chi  = x_derivitives_averages[i];       // x_derivitives[i];          // t-i to i   //// or here it could also be i+1
-      v = x_derivitives_averages[i-timedist]; // x_derivitives[i-timedist];
-      
-      updateC += ( ((M * chi) * (v^T) ) ) * (1./((double)Time));                 // time averaged on all product
+      Lambda  += (    x_derivitives_averages[i-timedist] ) * ((x_derivitives_averages[i-timedist])^T) ;    // average vector outer product
+      updateC += (M * x_derivitives_averages[i])           * ((x_derivitives_averages[i-timedist])^T) ;    // time averaged on all product
     }
     
-    
-    if (t%10 == 0)
+    if (t%Lambda_update_interval == 0)
       B = Lambda.pseudoInverse(); //is done only in every tenth step
     
-    updateC = updateC * B;
+    updateC = updateC * B;        // goes to unit matrix if timedist==0
+    uC = updateC;
 	
 	  C_update = updateC.mapP(5.0, clip);
     break;
@@ -276,7 +251,7 @@ void DEP::learnController(){
   //   C_update += ((updateC   - C_update)*urate);  // disabled, is done in DEPConf::DEPNEW:
   // }
 
-  // double reg = pow(10,-regularization);
+  double reg = pow(10,-regularization);
   
   switch(indnorm){
   case 1: {
