@@ -67,7 +67,7 @@ M, Lambda, B, C_update, C
 
 
 
-## uC Matrix Evaluations
+## updateC(uC) Matrix Evaluations
 
 
 **uC when Lambda_update_interval = 1**     |  **Lambda_update_interval = 2**

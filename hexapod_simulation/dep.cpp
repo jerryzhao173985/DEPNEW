@@ -224,13 +224,13 @@ void DEP::learnController(){
     Lambda.toZero();  //just in case
     updateC.toZero(); //just in case: updateC must be clean before the summation process starting
     
-    for(int i=(t-Time); i<t; i++){            // 0--> T change to (t-T) --> t
+    for(int i=(t-Time); i<t; i++){            
       Lambda  += (    x_derivitives_averages[i-timedist] ) * ((x_derivitives_averages[i-timedist])^T) ;    // average vector outer product
       updateC += (M * x_derivitives_averages[i])           * ((x_derivitives_averages[i-timedist])^T) ;    // time averaged on all product
     }
     
     if (t%Lambda_update_interval == 0)
-      B = Lambda.pseudoInverse(); //is done only in every tenth step
+      B = Lambda.pseudoInverse(); //is done only in every [Lambda_update_interval] step
     
     updateC = updateC * B;        // goes to unit matrix if timedist==0
     uC = updateC;
