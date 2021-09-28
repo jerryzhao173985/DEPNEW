@@ -324,6 +324,7 @@ public:
         dep->setParam("epsh",0.0);
         dep->setParam("synboost",2.2);
         dep->setParam("learningrule", 3);  // 3 is the DEPNEW rule
+        dep->setParam("urate",0.1);
 
         // dep->setParam("indnorm",1); // 0 is global normalization
         // dep->setParam("urate",0.05);
@@ -531,10 +532,14 @@ public:
     DEP* dep = dynamic_cast<DEP*>(globalData.agents[0]->getController());
     double boost = dep->getParam("synboost");
     int Time = dep->getParam("Time");
+    int timedist = dep->getParam("timedist");
+    int uInterval = dep->getParam("Lambda_update_interval");
+    int regularization = dep->getParam("regularization");
+    double urate = dep->getParam("urate");
 
-    char config_chars[50] = {0};    
-    sprintf(config_chars, "Synboost: %.1f, Time: %d" //, Bin:(%d,%d), Z: %.2f" 
-      ,boost, Time);
+    char config_chars[100] = {0};    
+    sprintf(config_chars, "B: %.1f T: %d dist: %d Inv: %d reg: %d lr: %.2f" //, Bin:(%d,%d), Z: %.2f" 
+      ,boost, Time, timedist, uInterval, regularization, urate);
     std::string config_string(config_chars);
     setTitle(/*"Cov: " + to_string(coverage) +*/ config_string);
 

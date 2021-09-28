@@ -39,14 +39,14 @@ DEP::DEP(const DEPConf& conf)
                   std::accumulate(conf.LearningRuleNames.begin(),conf.LearningRuleNames.end(),
                                   std::string(),[](std::string a, std::pair<DEPConf::LearningRule,std::string> lr){return a + itos((int)lr.first) + ": " + lr.second + ", ";}));
   addParameterDef("timedist", &timedist, 3,     0,10, "time distance of product terms in learning rule");
-  addParameterDef("synboost", &synboost, 5,     0,1,  "booster for synapses during motor signal creation");
-  addParameterDef("urate", &urate, .0,          0,5,  "update rate ");
+  addParameterDef("synboost", &synboost, 1.0,     0,5,  "booster for synapses during motor signal creation");
+  addParameterDef("urate", &urate, .1,          0,5,  "update rate ");
   addParameterDef("Time", &Time, 50,          0,500,  "Time ");
   addParameterDef("Lambda_update_interval", &Lambda_update_interval, 10,          0,500,  "Lambda update interval ");
 
   //  addParameterDef("maxspeed", &maxSpeed, 0.5,   0,2, "maximal speed for motors");
   addParameterDef("indnorm", &indnorm,     2,   0,5, "individual normalization for each motor");
-  addParameterDef("regularization", &regularization, 2, 0, 15, "exponent of regularization 10^{-regularization}");
+  addParameterDef("regularization", &regularization, 2, -15, 15, "exponent of regularization 10^{-regularization}");
 
   addInspectableMatrix("M", &M, false, "inverse-model matrix");
 
@@ -235,7 +235,11 @@ void DEP::learnController(){
     updateC = updateC * B;        // goes to unit matrix if timedist==0
     uC = updateC;
 	
-	  C_update = updateC.mapP(5.0, clip);
+    // C_update = updateC;        //Hard update C_update
+    if ( t > 10){                 //Soft update (moving)
+      C_update += ((updateC   - C_update)*urate);  
+    }
+	  // C_update = updateC.mapP(5.0, clip); 
     break;
   } 
 
@@ -270,6 +274,11 @@ void DEP::learnController(){
     double norm1 = sqrt((C_update*(M^T)).norm_sqr());
     C = C_update * (synboost /(norm1 + reg)); // C stays relatively constant in size
     C.toMapP(5.0,clip); // nevertheless clip C to some reasonable range
+    break;
+  }
+  case 2:{  // no matter the synboost, we keep a reasonable C
+    C = C_update * synboost;
+    C.toMapP(5.0, clip);
     break;
   }
   default:  { // no normalization
