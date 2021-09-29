@@ -40,7 +40,7 @@ DEP::DEP(const DEPConf& conf)
                                   std::string(),[](std::string a, std::pair<DEPConf::LearningRule,std::string> lr){return a + itos((int)lr.first) + ": " + lr.second + ", ";}));
   addParameterDef("timedist", &timedist, 3,     0,10, "time distance of product terms in learning rule");
   addParameterDef("synboost", &synboost, 1.0,     0,5,  "booster for synapses during motor signal creation");
-  addParameterDef("urate", &urate, .1,          0,5,  "update rate ");
+  addParameterDef("urate", &urate, .0,          0,5,  "update rate ");
   addParameterDef("Time", &Time, 50,          0,500,  "Time ");
   addParameterDef("Lambda_update_interval", &Lambda_update_interval, 10,          0,500,  "Lambda update interval ");
 
@@ -269,7 +269,7 @@ void DEP::learnController(){
     C.toMapP(5.0,clip); // nevertheless clip C to some reasonable range
     break;
   }
-  case 2:{  // no matter the synboost, we keep a reasonable C
+  case 2:{  
     C.toMapP(5.0, clip);
     C = C * synboost;
     break;

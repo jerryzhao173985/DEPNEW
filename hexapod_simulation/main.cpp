@@ -324,7 +324,7 @@ public:
         dep->setParam("epsh",0.0);
         dep->setParam("synboost",2.2);
         dep->setParam("learningrule", 3);  // 3 is the DEPNEW rule
-        dep->setParam("urate",0.1);
+        // dep->setParam("urate",0.1);
 
         // dep->setParam("indnorm",1); // 0 is global normalization
         // dep->setParam("urate",0.05);

@@ -3,7 +3,7 @@
 epsM = 0.0
 epsh = 0.0
 synboost = 1.0
-urate = 0.1
+urate = 0.0
 indnorm = 2
 regularization = 3
 timedist = 3
