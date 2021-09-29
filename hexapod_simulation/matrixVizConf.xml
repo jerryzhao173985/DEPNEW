@@ -1,13 +1,13 @@
 <!DOCTYPE MatrixVizConfigFile>
 <MatrixVizConfiguration>
- <MatrixVizWindow X="937" Y="25"/>
- <VisualisationWindow width="509" mode="matrix" X="-10" Y="1398" visMode="0" height="486" source="C" colorPaletteFile=""/>
- <VisualisationWindow width="742" mode="vector" X="327" Y="1202" visMode="0" height="682" source="x" colorPaletteFile=""/>
- <VisualisationWindow width="746" mode="vector" X="452" Y="1202" visMode="0" height="681" source="y" colorPaletteFile=""/>
- <VisualisationWindow width="512" mode="matrix" X="-10" Y="1131" visMode="0" height="447" source="Lambda" colorPaletteFile=""/>
- <VisualisationWindow width="510" mode="matrix" X="-10" Y="1421" visMode="0" height="463" source="C_update" colorPaletteFile=""/>
- <VisualisationWindow width="300" mode="matrix" X="937" Y="141" visMode="0" height="300" source="Lambda" colorPaletteFile=""/>
- <VisualisationWindow width="433" mode="matrix" X="-10" Y="716" visMode="0" height="384" source="C" colorPaletteFile=""/>
- <VisualisationWindow width="300" mode="matrix" X="937" Y="472" visMode="0" height="300" source="B" colorPaletteFile=""/>
- <VisualisationWindow width="300" mode="matrix" X="1426" Y="25" visMode="0" height="300" source="uC" colorPaletteFile=""/>
+ <MatrixVizWindow X="927" Y="25"/>
+ <VisualisationWindow width="509" mode="matrix" X="-10" Y="1390" visMode="0" height="486" source="C" colorPaletteFile=""/>
+ <VisualisationWindow width="742" mode="vector" X="317" Y="1194" visMode="0" height="682" source="x" colorPaletteFile=""/>
+ <VisualisationWindow width="746" mode="vector" X="502" Y="1151" visMode="0" height="681" source="y" colorPaletteFile=""/>
+ <VisualisationWindow width="512" mode="matrix" X="-10" Y="1123" visMode="0" height="447" source="Lambda" colorPaletteFile=""/>
+ <VisualisationWindow width="510" mode="matrix" X="-10" Y="1413" visMode="0" height="463" source="C_update" colorPaletteFile=""/>
+ <VisualisationWindow width="300" mode="matrix" X="927" Y="133" visMode="0" height="300" source="Lambda" colorPaletteFile=""/>
+ <VisualisationWindow width="433" mode="matrix" X="-10" Y="708" visMode="0" height="384" source="C" colorPaletteFile=""/>
+ <VisualisationWindow width="300" mode="matrix" X="927" Y="464" visMode="0" height="300" source="B" colorPaletteFile=""/>
+ <VisualisationWindow width="300" mode="matrix" X="1416" Y="25" visMode="0" height="300" source="uC" colorPaletteFile=""/>
 </MatrixVizConfiguration>

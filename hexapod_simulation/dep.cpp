@@ -222,24 +222,17 @@ void DEP::learnController(){
 
   case DEPConf::DEPNEW: { // DEP NEW rules (Averaging and mapping)
     Lambda.toZero();  //just in case
-    updateC.toZero(); //just in case: updateC must be clean before the summation process starting
+    C.toZero();       //just in case: C must be clean before the summation process starting
     
     for(int i=(t-Time); i<t; i++){            
       Lambda  += (    x_derivitives_averages[i-timedist] ) * ((x_derivitives_averages[i-timedist])^T) ;    // average vector outer product
-      updateC += (M * x_derivitives_averages[i])           * ((x_derivitives_averages[i-timedist])^T) ;    // time averaged on all product
+      C       += (M * x_derivitives_averages[i])           * ((x_derivitives_averages[i-timedist])^T) ;    // time averaged on all product
     }
     
     if (t%Lambda_update_interval == 0)
       B = Lambda.pseudoInverse(); //is done only in every [Lambda_update_interval] step
     
-    updateC = updateC * B;        // goes to unit matrix if timedist==0
-    uC = updateC;
-	
-    // C_update = updateC;        //Hard update C_update
-    if ( t > 10){                 //Soft update (moving)
-      C_update += ((updateC   - C_update)*urate);  
-    }
-	  // C_update = updateC.mapP(5.0, clip); 
+    C = C * B;        // goes to unit matrix if timedist==0
     break;
   } 
 
@@ -277,8 +270,8 @@ void DEP::learnController(){
     break;
   }
   case 2:{  // no matter the synboost, we keep a reasonable C
-    C = C_update * synboost;
     C.toMapP(5.0, clip);
+    C = C * synboost;
     break;
   }
   default:  { // no normalization
