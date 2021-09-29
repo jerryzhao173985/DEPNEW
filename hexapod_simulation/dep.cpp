@@ -45,7 +45,7 @@ DEP::DEP(const DEPConf& conf)
   addParameterDef("Lambda_update_interval", &Lambda_update_interval, 10,          0,500,  "Lambda update interval ");
 
   //  addParameterDef("maxspeed", &maxSpeed, 0.5,   0,2, "maximal speed for motors");
-  addParameterDef("indnorm", &indnorm,     2,   0,5, "individual normalization for each motor");
+  addParameterDef("indnorm", &indnorm,     2,   0,10, "individual normalization for each motor");
   addParameterDef("regularization", &regularization, 2, -15, 15, "exponent of regularization 10^{-regularization}");
 
   addInspectableMatrix("M", &M, false, "inverse-model matrix");
@@ -272,6 +272,20 @@ void DEP::learnController(){
   case 2:{  
     C.toMapP(5.0, clip);
     C = C * synboost;
+    break;
+  }
+
+
+  case 3:{  
+    C.toMapP(10.0, clip);
+    const Matrix& CM=C*(M^T);
+    for (int i=0; i<number_motors; i++) {
+      double normi = sqrt(CM.row(i).norm_sqr()); // norm of one row
+      if(t%100==0)
+        std::cout << normi << std::endl;
+      normmot.val(i,0) = /*.3**/synboost/( normi + reg);
+    }
+    C = C.multrowwise(normmot);
     break;
   }
   default:  { // no normalization
